@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Group</title>
+    <link rel="stylesheet" href="/css/create-group.css">
+</head>
+<body>
+<div class="group-form-container">
+    <h1 class="form-heading">Create a Group</h1>
+    <form th:action="@{/groups/create}" th:object="${group}" method="post" enctype="multipart/form-data" class="group-form">
+        <label for="groupName" class="form-label">Group Name:</label>
+        <input type="text" id="groupName" th:field="*{name}" placeholder="Enter group name" class="form-input" required>
+
+        <label for="groupDescription" class="form-label">Group Description:</label>
+        <input type="text" id="groupDescription" th:field="*{description}" placeholder="Enter group description" class="form-input">
+
+        <label for="groupImage" class="form-label">Group Image:</label>
+        <input type="file" id="groupImage" th:field="*{image.image}" name="image" accept="image/*" class="form-input" required>
+
+        <div th:if="${errorMessage}" class="error-message">
+            <p th:text="${errorMessage}">Group name already exists. Please choose another one.</p>
+        </div>
+
+        <label class="form-label">Members:</label>
+        <div id="members" class="members-list"></div>
+        <button type="button" id="addMember" class="add-member-button">Add Member</button>
+        <button type="submit" class="button-33">Create Group</button>
+
+        <div id="member-template" style="display: none;">
+            <div class="member-item">
+                <input type="text" placeholder="Search for username" class="form-input search-user" />
+                <ul class="user-suggestions" style="display: none;"></ul>
+                <input type="hidden" name="members[]" class="selected-member" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="loggedInUser" th:data-username="${loggedInUserUsername}"></div>
+
+<script>
+    const loggedInUsername = document.getElementById('loggedInUser').getAttribute('data-username');
+    console.log('Logged-in Username:', loggedInUsername);
+
+    document.getElementById('addMember').addEventListener('click', function () {
+        const membersDiv = document.getElementById('members');
+        const template = document.getElementById('member-template');
+        const newMemberDiv = template.cloneNode(true);
+
+        newMemberDiv.style.display = 'block';
+        newMemberDiv.id = '';
+        membersDiv.appendChild(newMemberDiv);
+
+        const searchInput = newMemberDiv.querySelector('.search-user');
+        const suggestionsList = newMemberDiv.querySelector('.user-suggestions');
+
+        searchInput.addEventListener('input', function () {
+            const query = searchInput.value.trim();
+
+            fetch(`/users/search?query=${encodeURIComponent(query)}&loggedInUsername=${encodeURIComponent(loggedInUsername)}`)
+                .then(response => response.json())
+                .then(users => {
+                    suggestionsList.innerHTML = '';
+
+                    console.log('Users received from API:', users);
+
+                    if (users.length === 0) {
+                        suggestionsList.style.display = 'none';
+                        return;
+                    }
+
+                    suggestionsList.style.display = 'block';
+
+                    users.forEach(username => {
+                        const suggestionItem = document.createElement('li');
+                        suggestionItem.textContent = username;
+                        suggestionItem.className = 'suggestion-item';
+
+                        suggestionItem.addEventListener('click', function () {
+                            searchInput.value = username;
+                            newMemberDiv.querySelector('.selected-member').value = username;
+                            suggestionsList.style.display = 'none';
+                        });
+
+                        suggestionsList.appendChild(suggestionItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!newMemberDiv.contains(event.target)) {
+                suggestionsList.style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>

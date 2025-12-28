@@ -1,0 +1,100 @@
+<div th:fragment="home-nav" xmlns:th="http://www.thymeleaf.org">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" th:href="@{/home}">
+            <img src="/images/logo/e-learning-platform-logo-nav.png" alt="E-Learning Logo" style="height: 60px;">
+        </a>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav mr-auto" th:if="${(loggedInUser != null && loggedInUser.hasRole('ROLE_INSTRUCTOR')) || (loggedUser != null && loggedUser.hasRole('ROLE_INSTRUCTOR'))}">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructor/courses}">My Courses</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/courses/create}">Create Course</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/instructor/events}">Manage Events</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav mr-auto" th:unless="${(loggedInUser != null && loggedInUser.hasRole('ROLE_INSTRUCTOR')) || (loggedUser != null && loggedUser.hasRole('ROLE_INSTRUCTOR'))}">
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()') && #authentication.principal != null && !#authentication.principal.getUser().isAdmin()}">
+                    <a class="nav-link" th:href="@{/home}">Home</a>
+                </li>
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()') && #authentication.principal != null && !#authentication.principal.getUser().isAdmin()}">
+                    <a class="nav-link" th:href="@{/courses/student/{id}(id=${#authentication.principal.getUser().id})}">My Courses</a>
+                </li>
+                <li class="nav-item" th:if="${!#authorization.expression('isAuthenticated()') or (#authentication.principal != null && #authentication.principal.getUser().isAdmin())}">
+                    <a class="nav-link" th:href="@{/courses}">All Courses</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/news}">News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/help}">FAQ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/events}">Events</a>
+                </li>
+                <li th:if="${#authorization.expression('isAuthenticated()') && #authentication.principal != null && #authentication.principal.getUser().isAdmin()}"
+                    class="nav-item">
+                    <a class="nav-link" th:href="@{/admin}">Admin Panel</a>
+                </li>
+            </ul>
+            <!-- Search box in the middle of the navbar -->
+            <form class="form-inline mx-auto" th:action="@{/search}" method="get">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+            <ul class="navbar-nav text-light my-2 my-lg-0 ml-auto">
+                <li th:if="${#authorization.expression('isAuthenticated()') && #authentication.principal != null}" class="nav-item">
+                    <div class="profile-container">
+                        <div class="profile-pic-container" th:data-username="${#authentication.principal.username}">
+                            <img class="rounded-circle profile-pic"
+                                 style="width: 40px; height: 40px; object-fit: cover;"
+                                 id="profilePicture"
+                                 alt="Profile Picture"/>
+                            <span class="profile-name" th:text="${#authentication.principal.user.fullName}"></span>
+                            <div class="custom-dropdown-menu">
+                                <a class="dropdown-item" th:href="@{/profile}">My Profile</a>
+                                <a class="dropdown-item" href="#">Settings</a>
+                                <a class="dropdown-item" th:href="@{/logout}">Log Out</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li th:if="${!#authorization.expression('isAuthenticated()')}" class="nav-item">
+                    <a class="nav-link btn btn-outline-secondary mx-1" th:href="@{/login}">Login</a>
+                </li>
+                <li th:if="${!#authorization.expression('isAuthenticated()')}" class="nav-item">
+                    <a class="nav-link btn btn-outline-success mx-1 text-white" th:href="@{/register}">Register</a>
+                </li>
+            </ul>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+
+                    const profileContainer = document.querySelector('.profile-pic-container');
+                    const username = profileContainer.dataset.username;
+
+                    const profilePictureUrl = `/api/images/${username}`;
+
+                    fetch(profilePictureUrl)
+                        .then(response => {
+                            if (response.ok) {
+                                return response.blob();
+                            } else {
+                                throw new Error('Failed to load profile picture.');
+                            }
+                        })
+                        .then(async blob => {
+                            const imageUrl = URL.createObjectURL(await blob);
+                            const profileImg = document.getElementById('profilePicture');
+                            profileImg.src = imageUrl;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching profile picture:', error);
+                        });
+                });
+            </script>
+        </div>
+    </nav>
+</div>

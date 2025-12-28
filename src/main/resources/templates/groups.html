@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groups</title>
+    <link rel="stylesheet" href="/css/groups.css">
+    <link rel="stylesheet" href="/css/profile-pic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/home-nav :: home-nav}"/>
+<!-- Main Container -->
+<div class="container-fluid mt-5">
+    <!-- Header with filter and create group -->
+    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
+        <div class="filter-container">
+            <label for="filterCriteria" class="form-label">Filter Groups:</label>
+            <select class="form-select" id="filterCriteria" aria-label="Filter groups">
+                <option value="all">All groups</option>
+                <option value="joined">My groups</option>
+                <option value="notJoined">New groups</option>
+            </select>
+        </div>
+        <button class="button-33" role="button" onclick="window.location.href='/groups/create'">+ Create Group</button>
+    </div>
+
+    <!-- Group List Section -->
+    <section id="groupsList" class="d-flex flex-column gap-3 px-3">
+        <a class="group-card align-items-center gap-3"
+           th:each="group : ${groups}"
+           th:href="@{'/groups/' + ${group.id}}"
+           th:attr="data-filter=${group.members.contains(loggedUser) ? 'joined' : 'notJoined'}"
+           th:classappend="${group.members.contains(loggedUser) ? '' : 'disabled-link'}"
+           onclick="handleCardClick(this, event)">
+            <!-- Group Image -->
+            <img th:src="${group.getImageBase64()}" alt="Group Image" loading="lazy">
+
+            <!-- Group Details -->
+            <div class="group-details">
+                <h5 th:text="${group.name}">Group Name</h5>
+                <p class="group-description" th:text="${group.description}">Short description of the group.</p>
+            </div>
+
+            <div class="ms-auto">
+                <button class="button button-primary"
+                        th:if="${!group.members.contains(loggedUser)}"
+                        th:text="'Join'"
+                        th:onclick="|joinGroup(event, ${group.id})|">Join</button>
+
+                <button class="button button-secondary disabled"
+                        th:if="${group.members.contains(loggedUser)}"
+                        th:text="'Joined'"
+                        aria-disabled="true">Joined</button>
+            </div>
+        </a>
+    </section>
+</div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true"
+     th:if="${errorMessage}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p th:text="${errorMessage}">An error occurred. Please try again later.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"/>
+
+<script>
+
+    function handleCardClick(element, event) {
+        if (element.classList.contains('disabled-link')) {
+            // Prevent click and navigation
+            event.preventDefault();
+            event.stopPropagation();
+            alert("You must join this group before accessing it.");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const errorModal = document.getElementById('errorModal');
+        if (errorModal) {
+            const modal = new bootstrap.Modal(errorModal);
+            modal.show();
+        }
+    });
+
+    document.getElementById('filterCriteria').addEventListener('change', function() {
+        const selectedValue = this.value;
+        const groups = document.querySelectorAll('#groupsList .group-card');
+
+        groups.forEach(group => {
+            const groupFilter = group.getAttribute('data-filter');
+            if (selectedValue === 'all' || groupFilter === selectedValue) {
+                group.classList.remove('d-none');
+            } else {
+                group.classList.add('d-none');
+            }
+        });
+    });
+
+    function joinGroup(event, groupId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch(`/groups/${groupId}/join`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`Successfully joined group with ID: ${groupId}`);
+                    location.reload();
+                } else {
+                    console.error(`Failed to join group with ID: ${groupId}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function displayErrorMessage(message) {
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        const errorMessageContainer = document.querySelector('#errorModal .modal-body ul');
+        const newError = document.createElement('li');
+        newError.textContent = message;
+        errorMessageContainer.appendChild(newError);
+        errorModal.show();
+    }
+</script>
+</body>
+</html>

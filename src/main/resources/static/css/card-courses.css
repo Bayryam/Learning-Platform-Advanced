@@ -1,0 +1,194 @@
+/* Custom class for card images */
+.custom-card-img {
+    width: 100%; /* Ensures the image spans the full width of its container */
+    height: 180px; /* Fixed height for uniform appearance */
+    object-fit: cover; /* Crop the image to fit the dimensions without distortion */
+    border-radius: 0.25rem; /* Match Bootstrap's default card border-radius */
+    transition: transform 0.3s ease-in-out; /* Smooth scaling effect */
+}
+
+.nav {
+    flex-wrap: nowrap;
+}
+
+/* Ensuring the categories navigation bar can scroll horizontally */
+.nav-pills {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden; /* Prevent vertical scroll */
+    margin: 0; /* Reset Bootstrap's default margin */
+    gap: 10px; /* Add spacing between items */
+    scroll-padding-left: 15px; /* Ensure the first item is not clipped */
+    scroll-behavior: smooth; /* Smooth scrolling */
+    box-sizing: border-box; /* Ensure padding doesn't break layout */
+    padding-bottom: 0.5rem;
+}
+
+.nav-pills .nav-item {
+    flex-shrink: 0; /* Prevent items from shrinking */
+    font-weight: bold;
+}
+
+.nav-pills .nav-link {
+    white-space: nowrap; /* Prevent text wrapping */
+    padding: 0.5rem 1rem; /* Adjust padding for better fit */
+    text-align: center; /* Center align text */
+    color: #246b3a;
+}
+
+.nav-pills.centered {
+    justify-content: center; /* Center the items horizontally */
+    overflow-x: visible; /* Disable scrolling */
+}
+
+/* Fix Bootstrap's box-shadow on active tabs */
+.nav-pills .nav-link.active {
+    box-shadow: none; /* Remove box-shadow */
+    background-color: #6fa574;
+}
+
+/* Optional: Custom scrollbar styling for better visuals */
+.nav-pills::-webkit-scrollbar {
+    height: 6px;
+}
+
+.nav-pills::-webkit-scrollbar-thumb {
+    background: #888; /* Customize scrollbar thumb */
+    border-radius: 3px;
+}
+
+.nav-pills::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Custom class for cards */
+.custom-card {
+    cursor: pointer;
+    margin: 1rem; /* Adds spacing between cards */
+    min-width: 15rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for visual appeal */
+    border: 1px solid #ddd; /* Optional: light border for cleaner visuals */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth transform and shadow change */
+}
+
+/* Hover effect for cards */
+.custom-card:hover {
+    transform: translateY(-10px); /* Slight lift effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+/* Hover effect for images */
+.custom-card:hover .custom-card-img {
+    transform: scale(1.05); /* Slight zoom on image */
+}
+
+/* Hover effect for card body */
+.custom-card-body {
+    transition: color 0.3s ease-in-out; /* Smooth transition for text color */
+}
+
+.custom-card:hover .custom-card-body {
+    color: #328e59; /* Change text color to primary on hover */
+}
+
+.card-body {
+    background-color: #eaf4eb;
+}
+
+/* Hover effect for card body */
+.custom-card-body {
+    background-color: white;
+    transition: color 0.3s ease-in-out; /* Smooth transition for text color */
+}
+
+.custom-card-button {
+    display: none; /* Hide the button completely */
+}
+.course-completion {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px 0;
+}
+.course-completion p {
+    font-size: 18px;
+    color: #333;
+}
+.course-completion .btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #328e59;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.course-completion .btn:hover {
+    background-color: #246b3a;
+}
+
+.edit-btn, .save-btn, .cancel-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 5px;
+}
+
+.save-btn, .cancel-btn {
+    background-color: #28a745;
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+}
+
+.course-input {
+    width: 100%;
+    padding: 5px;
+    font-size: 1rem;
+    margin-top: 5px;
+}
+
+
+.button-33 {
+    background-color: rgba(118, 169, 123, 0.92);
+    border-radius: 100px;
+    box-shadow: rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px;
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif;
+    padding: 7px 20px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 250ms;
+    border: 0;
+    font-size: 16px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.button-33:hover {
+    box-shadow: rgba(44, 187, 99, .35) 0 -25px 18px -14px inset, rgba(44, 187, 99, .25) 0 1px 2px, rgba(44, 187, 99, .25) 0 2px 4px, rgba(44, 187, 99, .25) 0 4px 8px, rgba(44, 187, 99, .25) 0 8px 16px, rgba(44, 187, 99, .25) 0 16px 32px;
+    transform: scale(1.05) rotate(-1deg);
+    text-decoration: none;
+    color: white;
+}
+
+.button-container-create {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
