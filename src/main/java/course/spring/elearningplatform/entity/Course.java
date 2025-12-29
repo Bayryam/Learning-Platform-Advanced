@@ -1,6 +1,7 @@
 package course.spring.elearningplatform.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class Course {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> categories;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     private User createdBy;
     private Date createdOn;
@@ -41,9 +43,11 @@ public class Course {
     @Transient
     private String imageBase64;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "startedCourses")
     private List<User> participants;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "completedCourses")
     private List<User> studentsCompletedCourse;
 
@@ -58,6 +62,7 @@ public class Course {
 
     @ManyToMany(cascade = CascadeType.ALL) // Ensures cascading behavior for highScores
     private List<StudentResult> highScores;
+    @JsonIgnore
     @OneToMany(mappedBy = "forCourse")
     private List<Ticket> tickets;
 

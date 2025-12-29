@@ -2,11 +2,21 @@ package course.spring.elearningplatform.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
@@ -22,36 +32,58 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", HOME_PAGE, REGISTER_PAGE, LOGIN_PAGE, STATIC_RESOURCES, IMAGES).permitAll()
-                        .requestMatchers("/news/**", "/events/**", "/help/**", "/courses/**").permitAll()
-                        .requestMatchers(LOGOUT_PAGE).authenticated()
-                        .requestMatchers("/quizzes/submit").permitAll()
-                        .requestMatchers("/admin/**", "/users/{id}", "/users/edit/{id}").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage(LOGIN_PAGE)
-                        .defaultSuccessUrl(HOME_PAGE, true)
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl(LOGOUT_PAGE)
-                        .logoutSuccessUrl(LOGOUT_SUCCESS_URL)
-                        .permitAll()
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
-                        .logoutRequestMatcher(new AntPathRequestMatcher(LOGOUT_PAGE, "GET"))
-                )
-                .exceptionHandling(exception -> exception
-                        .accessDeniedHandler(customAccessDeniedHandler())
-                );
-
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Add this line
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**")
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/me", "/api/home", "/api/home/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/instructor/**").hasRole("INSTRUCTOR")
+                .requestMatchers("/api/**").authenticated()
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/api/images/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .successHandler((request, response, authentication) -> {
+                    response.setStatus(200);
+                    response.getWriter().write("{\"success\": true}");
+                    response.getWriter().flush();
+                })
+                .failureHandler((request, response, exception) -> {
+                    response.setStatus(401);
+                    response.getWriter().write("{\"error\": \"Invalid credentials\"}");
+                    response.getWriter().flush();
+                })
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+            );
 
         return http.build();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/login", configuration);  // Add this line
+        source.registerCorsConfiguration("/logout", configuration);  // Add this line
+        return source;
+    }
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
         return new CustomAccessDeniedHandler();
@@ -60,5 +92,10 @@ public class SecurityConfig {
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 }

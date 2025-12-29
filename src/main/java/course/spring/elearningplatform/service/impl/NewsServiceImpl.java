@@ -32,4 +32,9 @@ public class NewsServiceImpl implements NewsService {
         return newsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("News not found with id: " + id));
     }
+
+    @Override
+    public News saveNews(News news) {
+        return newsRepository.save(news);
+    }
 }

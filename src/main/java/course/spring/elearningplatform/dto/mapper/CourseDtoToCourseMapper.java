@@ -6,6 +6,7 @@ import course.spring.elearningplatform.entity.Course;
 import course.spring.elearningplatform.entity.Image;
 import course.spring.elearningplatform.entity.User;
 import course.spring.elearningplatform.service.ImageService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
@@ -18,8 +19,9 @@ public class CourseDtoToCourseMapper {
         course.setCreatedBy(user);
         course.setCreatedOn(new Date());
 
-        ImageDto imageDto = courseDto.getImage();
-        if (imageDto != null) {
+        MultipartFile imageFile = courseDto.getImage();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            ImageDto imageDto = new ImageDto(imageFile);
             Image savedImage = imageService.createImage(imageDto);
             course.setImage(savedImage);
         }

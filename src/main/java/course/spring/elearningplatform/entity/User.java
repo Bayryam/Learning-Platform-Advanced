@@ -1,5 +1,6 @@
 package course.spring.elearningplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -9,11 +10,11 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@Data
+@ToString(exclude = {"solutions", "startedCourses", "completedCourses", "completedLessons", "groups", "profilePicture", "courses", "tickets", "certificates"})
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
-@Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"groups", "courses", "startedCourses", "completedCourses", "tickets", "completedLessons", "certificates"})
 public class User {
 
     public static final String ROLE_STUDENT = "STUDENT";
@@ -30,6 +31,10 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user")
+    private List<Solution> solutions;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "profile_picture_id")
@@ -51,26 +56,30 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Group> groups;
 
+    @JsonIgnore
     @OneToMany
     private Set<Course> courses;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "user_started_courses",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
-    private List<Course> startedCourses;
+    private Set<Course> startedCourses;
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "user_completed_courses",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
-    private List<Course> completedCourses;
+    private Set<Course> completedCourses;
 
     @OneToMany(mappedBy = "issuer")
+    @JsonIgnore
     private List<Ticket> tickets;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -82,6 +91,7 @@ public class User {
     private Set<Lesson> completedLessons = new HashSet<>();
 
     @OneToMany(mappedBy = "issuedTo", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Certificate> certificates;
 
     public void addCertificate(Certificate certificate) {
