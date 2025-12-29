@@ -88,6 +88,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "lesson_id")
     )
+    @JsonIgnore
     private Set<Lesson> completedLessons = new HashSet<>();
 
     @OneToMany(mappedBy = "issuedTo", cascade = CascadeType.ALL)
