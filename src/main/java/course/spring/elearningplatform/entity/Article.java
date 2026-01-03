@@ -1,5 +1,6 @@
 package course.spring.elearningplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +27,7 @@ public class Article {
 
     @ManyToOne
     @JoinColumn(name = "author_id")
+    @JsonIgnoreProperties({"groups", "startedCourses", "completedCourses", "completedLessons", "solutions", "courses", "tickets", "certificates", "password"})
     private User author;
 
     private LocalDateTime createdAt;
@@ -34,5 +36,6 @@ public class Article {
 
     @ManyToOne
     @JoinColumn(name = "group_id")
+    @JsonIgnoreProperties({"articles", "members"})
     private Group group;
 }

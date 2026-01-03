@@ -2,19 +2,23 @@ package course.spring.elearningplatform.api;
 
 import course.spring.elearningplatform.dto.ArticleDto;
 import course.spring.elearningplatform.dto.GroupDto;
+import course.spring.elearningplatform.dto.ImageDto;
 import course.spring.elearningplatform.entity.Group;
 import course.spring.elearningplatform.service.ActivityLogService;
 import course.spring.elearningplatform.service.ArticleService;
 import course.spring.elearningplatform.service.GroupService;
 import course.spring.elearningplatform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -47,9 +51,25 @@ public class GroupRestController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
-    public ResponseEntity<?> createGroup(@RequestBody GroupDto groupDto,
-                                        @AuthenticationPrincipal UserDetails userDetails) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createGroup(
+            @RequestParam("name") String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "members", required = false) Set<String> members,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        GroupDto groupDto = new GroupDto();
+        groupDto.setName(name);
+        groupDto.setDescription(description);
+        groupDto.setMembers(members);
+
+        if (image != null && !image.isEmpty()) {
+            ImageDto imageDto = new ImageDto();
+            imageDto.setImage(image);
+            groupDto.setImage(imageDto);
+        }
+
         Group createdGroup = groupService.createGroup(groupDto);
         groupService.addMember(createdGroup.getId(), userDetails.getUsername());
         activityLogService.logActivity("Group created", userDetails.getUsername());

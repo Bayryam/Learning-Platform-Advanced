@@ -77,10 +77,14 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Group with id %s not found", id), "redirect:/groups"));
 
-        for (User user : group.getMembers()) {
-            user.getGroups().remove(group);
+        if (group.getMembers() != null && !group.getMembers().isEmpty()) {
+            for (User user : group.getMembers()) {
+                if (user.getGroups() != null) {
+                    user.getGroups().remove(group);
+                }
+            }
+            userRepository.saveAll(group.getMembers());
         }
-        userRepository.saveAll(group.getMembers());
 
         groupRepository.deleteById(id);
         return group;
@@ -89,8 +93,15 @@ public class GroupServiceImpl implements GroupService {
     private Group buildGroup(GroupDto groupDto) {
         Group group = new Group();
         group.setName(groupDto.getName());
-        groupDto.getMembers().removeAll(List.of(""));
-        Set<User> members = groupDto.getMembers().stream().map(userService::getUserByUsername).collect(Collectors.toCollection(HashSet::new));
+
+        Set<User> members = new HashSet<>();
+        if (groupDto.getMembers() != null && !groupDto.getMembers().isEmpty()) {
+            groupDto.getMembers().removeAll(List.of(""));
+            members = groupDto.getMembers().stream()
+                    .filter(username -> username != null && !username.trim().isEmpty())
+                    .map(userService::getUserByUsername)
+                    .collect(Collectors.toCollection(HashSet::new));
+        }
         group.setMembers(members);
         group.setArticles(groupDto.getArticles());
         group.setDescription(groupDto.getDescription());

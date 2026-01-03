@@ -1,5 +1,6 @@
 package course.spring.elearningplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,6 +34,7 @@ public class Group {
   private String description;
 
   @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JsonIgnoreProperties({"groups", "startedCourses", "completedCourses", "completedLessons", "solutions", "courses", "tickets", "certificates", "password"})
   private Set<User> members;
 
   @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
