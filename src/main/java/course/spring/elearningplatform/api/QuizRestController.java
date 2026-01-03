@@ -70,6 +70,6 @@ public class QuizRestController {
         List<Response> answers = submission.getAnswers();
         long elapsedTime = submission.getElapsedTime();
         activityLogService.logActivity("Quiz submitted", userDetails.getUsername());
-        return quizzesService.calculateQuizResult(courseId, quizId, answers, elapsedTime);
+        return quizzesService.calculateQuizResult(courseId, quizId, answers, elapsedTime, userDetails.getUsername());
     }
 }

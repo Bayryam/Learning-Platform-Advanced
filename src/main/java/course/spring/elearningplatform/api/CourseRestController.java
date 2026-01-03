@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/courses")
 public class CourseRestController {
-    
+
     private final CourseService courseService;
     private final LessonService lessonService;
     private final UserService userService;
@@ -36,9 +36,9 @@ public class CourseRestController {
     private final ActivityLogService activityLogService;
 
     @Autowired
-    public CourseRestController(CourseService courseService, LessonService lessonService, 
+    public CourseRestController(CourseService courseService, LessonService lessonService,
                                 UserService userService, SolutionService solutionService,
-                                CourseDashboardService courseDashboardService, 
+                                CourseDashboardService courseDashboardService,
                                 ActivityLogService activityLogService) {
         this.courseService = courseService;
         this.lessonService = lessonService;
@@ -52,12 +52,12 @@ public class CourseRestController {
     public ResponseEntity<?> getAllCourses() {
         Map<String, Set<Course>> coursesByCategory = courseService.getCoursesGroupedByCategory();
         Map<String, List<CourseResponse>> responseByCategory = coursesByCategory.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().stream()
-                    .map(this::toCourseResponse)
-                    .collect(Collectors.toList())
-            ));
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .map(this::toCourseResponse)
+                                .collect(Collectors.toList())
+                ));
         return ResponseEntity.ok(responseByCategory);
     }
 
@@ -68,15 +68,15 @@ public class CourseRestController {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream()
-                            .limit(3)
-                            .map(this::toCourseResponse)
-                            .toList()
+                                .limit(3)
+                                .map(this::toCourseResponse)
+                                .toList()
                 ));
         return ResponseEntity.ok(top3);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createCourse(@Valid @ModelAttribute CourseDto courseDto, 
+    public ResponseEntity<?> createCourse(@Valid @ModelAttribute CourseDto courseDto,
                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
         Course newCourse = courseService.addCourse(courseDto, userDetails.user());
         activityLogService.logActivity("New course created", userDetails.getUsername());
@@ -84,26 +84,29 @@ public class CourseRestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCourseById(@PathVariable Long id, 
+    public ResponseEntity<?> getCourseById(@PathVariable Long id,
                                            @AuthenticationPrincipal UserDetails userDetails) {
         Course course = courseService.getCourseById(id);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("course", toCourseResponse(course));
-        
+
+        Long quizId = courseService.getCourseQuizId(id);
+        response.put("hasQuiz", quizId != null);
+
         if (userDetails != null) {
             User user = userService.getUserByUsername(userDetails.getUsername());
-            
+
             List<AssignmentDto> assignments = course.getAssignments().stream()
                     .map(assignment -> EntityMapper.mapEntityToDto(assignment, AssignmentDto.class))
                     .toList();
-            
+
             Map<Long, Boolean> userSolutionStatus = assignments.stream()
                     .collect(Collectors.toMap(
                             AssignmentDto::getId,
                             assignment -> solutionService.hasUserUploadedSolution(user.getId(), assignment.getId())
                     ));
-            
+
             response.put("assignments", assignments);
             response.put("userSolutionStatus", userSolutionStatus);
             response.put("highscores", courseService.getHighScoresForCourse(id));
@@ -114,12 +117,12 @@ public class CourseRestController {
             response.put("isCourseCompleted", user.getCompletedCourses().contains(course));
             response.put("hasQuiz", course.getQuiz() != null);
         }
-        
+
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/name")
-    public ResponseEntity<?> updateCourseName(@PathVariable Long id, 
+    public ResponseEntity<?> updateCourseName(@PathVariable Long id,
                                               @RequestBody Map<String, String> payload,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         String newName = payload.get("name");
@@ -139,7 +142,7 @@ public class CourseRestController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<?> startCourse(@PathVariable Long id, 
+    public ResponseEntity<?> startCourse(@PathVariable Long id,
                                          @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
         Course startedCourse = courseService.startCourse(id, user);
@@ -152,8 +155,8 @@ public class CourseRestController {
     public ResponseEntity<?> getCoursesByCategory(@PathVariable String category) {
         List<Course> courses = courseService.getCoursesByCategory(category);
         List<CourseResponse> response = courses.stream()
-            .map(this::toCourseResponse)
-            .collect(Collectors.toList());
+                .map(this::toCourseResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
 
@@ -161,11 +164,11 @@ public class CourseRestController {
     public ResponseEntity<?> getStudentCourses(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         List<CourseResponse> startedCourses = courseService.getAllInProgressCoursesByUser(id).stream()
-            .map(this::toCourseResponse)
-            .collect(Collectors.toList());
+                .map(this::toCourseResponse)
+                .collect(Collectors.toList());
         List<CourseResponse> completedCourses = courseService.findCompletedCoursesByUserId(id).stream()
-            .map(this::toCourseResponse)
-            .collect(Collectors.toList());
+                .map(this::toCourseResponse)
+                .collect(Collectors.toList());
         response.put("startedCourses", startedCourses);
         response.put("completedCourses", completedCourses);
         return ResponseEntity.ok(response);
@@ -182,36 +185,36 @@ public class CourseRestController {
     }
 
     @GetMapping("/{courseId}/lessons/{lessonId}")
-public ResponseEntity<?> getLesson(@PathVariable Long courseId, @PathVariable Long lessonId,
-                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
-    Course course = courseService.getCourseById(courseId);
-    Lesson lesson = lessonService.getLessonById(lessonId);
-    User user = userDetails.getUser();
-    
-    Map<String, Object> response = new HashMap<>();
-    response.put("course", toCourseResponse(course));
-    response.put("lesson", toLessonResponse(lesson));
-    
-    // Map completed lessons to simple response objects
-    List<Map<String, Object>> completedLessonsInfo = user.getCompletedLessons().stream()
-        .map(l -> Map.of("id", (Object) l.getId(), "title", (Object) l.getTitle()))
-        .collect(java.util.stream.Collectors.toList());
-    
-    response.put("completedLessons", completedLessonsInfo);
-    response.put("isCreator", course.getCreatedBy().getId().equals(user.getId()));
-    
-    return ResponseEntity.ok(response);
-}
+    public ResponseEntity<?> getLesson(@PathVariable Long courseId, @PathVariable Long lessonId,
+                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Course course = courseService.getCourseById(courseId);
+        Lesson lesson = lessonService.getLessonById(lessonId);
+        User user = userService.getUserByUsername(userDetails.getUsername());
 
-// Add this helper method at the end of the class
-private course.spring.elearningplatform.dto.response.LessonResponse toLessonResponse(Lesson lesson) {
-    course.spring.elearningplatform.dto.response.LessonResponse response = new course.spring.elearningplatform.dto.response.LessonResponse();
-    response.setId(lesson.getId());
-    response.setTitle(lesson.getTitle());
-    response.setContent(lesson.getContent());
-    response.setCreatedOn(lesson.getCreatedOn());
-    return response;
-}
+        Map<String, Object> response = new HashMap<>();
+        response.put("course", toCourseResponse(course));
+        response.put("lesson", toLessonResponse(lesson));
+
+        // Map completed lessons to simple response objects
+        List<Map<String, Object>> completedLessonsInfo = user.getCompletedLessons().stream()
+                .map(l -> Map.of("id", (Object) l.getId(), "title", (Object) l.getTitle()))
+                .collect(java.util.stream.Collectors.toList());
+
+        response.put("completedLessons", completedLessonsInfo);
+        response.put("isCreator", course.getCreatedBy().getId().equals(user.getId()));
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Add this helper method at the end of the class
+    private course.spring.elearningplatform.dto.response.LessonResponse toLessonResponse(Lesson lesson) {
+        course.spring.elearningplatform.dto.response.LessonResponse response = new course.spring.elearningplatform.dto.response.LessonResponse();
+        response.setId(lesson.getId());
+        response.setTitle(lesson.getTitle());
+        response.setContent(lesson.getContent());
+        response.setCreatedOn(lesson.getCreatedOn());
+        return response;
+    }
 
     @PostMapping("/{courseId}/lessons/{lessonId}/complete")
     public ResponseEntity<?> markLessonComplete(@PathVariable Long courseId, @PathVariable Long lessonId,
@@ -223,42 +226,42 @@ private course.spring.elearningplatform.dto.response.LessonResponse toLessonResp
         activityLogService.logActivity("Completed lesson", userDetails.getUsername());
         return ResponseEntity.ok(Map.of("message", "Lesson marked as completed"));
     }
-    
-private CourseResponse toCourseResponse(Course course) {
-    CourseResponse response = new CourseResponse();
-    response.setId(course.getId());
-    response.setName(course.getName());
-    response.setDescription(course.getDescription());
-    response.setCategories(course.getCategories());
-    response.setCreatedOn(course.getCreatedOn());
-    response.setParticipantCount(course.getParticipants() != null ? course.getParticipants().size() : 0);
-    response.setCompletedCount(course.getStudentsCompletedCourse() != null ? course.getStudentsCompletedCourse().size() : 0);
-    response.setLessonsCount(course.getLessons() != null ? course.getLessons().size() : 0);
-    
-    if (course.getImage() != null && course.getImage().getImage() != null) {
-        response.setImageBase64(java.util.Base64.getEncoder().encodeToString(course.getImage().getImage()));
+
+    private CourseResponse toCourseResponse(Course course) {
+        CourseResponse response = new CourseResponse();
+        response.setId(course.getId());
+        response.setName(course.getName());
+        response.setDescription(course.getDescription());
+        response.setCategories(course.getCategories());
+        response.setCreatedOn(course.getCreatedOn());
+        response.setParticipantCount(course.getParticipants() != null ? course.getParticipants().size() : 0);
+        response.setCompletedCount(course.getStudentsCompletedCourse() != null ? course.getStudentsCompletedCourse().size() : 0);
+        response.setLessonsCount(course.getLessons() != null ? course.getLessons().size() : 0);
+
+        if (course.getImage() != null && course.getImage().getImage() != null) {
+            response.setImageBase64(java.util.Base64.getEncoder().encodeToString(course.getImage().getImage()));
+        }
+
+        if (course.getCreatedBy() != null) {
+            CourseResponse.UserBasicInfo userInfo = new CourseResponse.UserBasicInfo();
+            userInfo.setId(course.getCreatedBy().getId());
+            userInfo.setUsername(course.getCreatedBy().getUsername());
+            userInfo.setFullName(course.getCreatedBy().getFullName());
+            response.setCreatedBy(userInfo);
+        }
+
+        if (course.getLessons() != null) {
+            List<CourseResponse.LessonInfo> lessonInfoList = course.getLessons().stream()
+                    .map(lesson -> {
+                        CourseResponse.LessonInfo lessonInfo = new CourseResponse.LessonInfo();
+                        lessonInfo.setId(lesson.getId());
+                        lessonInfo.setTitle(lesson.getTitle());
+                        return lessonInfo;
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+            response.setLessons(lessonInfoList);
+        }
+
+        return response;
     }
-    
-    if (course.getCreatedBy() != null) {
-        CourseResponse.UserBasicInfo userInfo = new CourseResponse.UserBasicInfo();
-        userInfo.setId(course.getCreatedBy().getId());
-        userInfo.setUsername(course.getCreatedBy().getUsername());
-        userInfo.setFullName(course.getCreatedBy().getFullName());
-        response.setCreatedBy(userInfo);
-    }
-    
-    if (course.getLessons() != null) {
-        List<CourseResponse.LessonInfo> lessonInfoList = course.getLessons().stream()
-            .map(lesson -> {
-                CourseResponse.LessonInfo lessonInfo = new CourseResponse.LessonInfo();
-                lessonInfo.setId(lesson.getId());
-                lessonInfo.setTitle(lesson.getTitle());
-                return lessonInfo;
-            })
-            .collect(java.util.stream.Collectors.toList());
-        response.setLessons(lessonInfoList);
-    }
-    
-    return response;
-}
 }
