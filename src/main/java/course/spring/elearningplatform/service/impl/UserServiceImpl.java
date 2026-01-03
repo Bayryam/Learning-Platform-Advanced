@@ -112,7 +112,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsersByRole(Role role) {
-        return null;
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRoles() != null && user.getRoles().contains(role.getDescription()))
+                .collect(Collectors.toList());
     }
 
     private User buildUser(UserDto userDto) {

@@ -59,7 +59,7 @@ public class EventRestController {
     @PostMapping
     public ResponseEntity<?> createEvent(@RequestBody EventDto eventDto,
                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        eventDto.setInstructor(userDetails.getUsername());
+        eventDto.setInstructor(eventDto.getInstructor());
         eventService.saveEvent(eventDto);
         activityLogService.logActivity("New event created", userDetails.getUsername());
         return ResponseEntity.ok(Map.of("message", "Event created successfully"));
