@@ -161,7 +161,8 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Long getCourseQuizId(long courseId) {
         var course = getCourseById(courseId);
-        return course.getQuiz().getId();
+        Quiz quiz = course.getQuiz();
+        return quiz == null ? null : quiz.getId();
     }
 
     @Override

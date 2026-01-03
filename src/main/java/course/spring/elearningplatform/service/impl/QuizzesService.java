@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -57,8 +58,8 @@ public class QuizzesService {
 
         Collections.shuffle(quizQuestions);
         List<Question> selectedQuestions = quizQuestions.stream()
-            .limit(quizDto.getNumberOfQuestions())
-            .toList();
+                .limit(quizDto.getNumberOfQuestions())
+                .toList();
 
         quiz.setQuestions(new ArrayList<>(selectedQuestions));
 
@@ -67,12 +68,16 @@ public class QuizzesService {
 
     public Quiz getQuizById(long id) {
         return quizRepository.findById(id)
-            .orElseThrow(
-                () -> new EntityNotFoundException(String.format("Quiz with id %s not found", id), "redirect:/home"));
+                .orElseThrow(
+                        () -> new EntityNotFoundException(String.format("Quiz with id %s not found", id), "redirect:/home"));
 
     }
 
-    public ResponseEntity<Map<String, Integer>> calculateQuizResult(long courseId, long quizId, List<Response> answers, long elapsedTime) {
+    @Transactional
+    public ResponseEntity<Map<String, Integer>> calculateQuizResult(long courseId, long quizId,
+                                                                    List<Response> answers,
+                                                                    long elapsedTime,
+                                                                    String username) {
         Optional<Quiz> quizOptional = quizRepository.findById(quizId);
         if (quizOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -81,27 +86,37 @@ public class QuizzesService {
         List<Question> questionsDB = quiz.getQuestions();
 
         int rightAnswers =
-            Math.toIntExact(answers.stream().filter(answer -> isCorrectAnswer(answer, questionsDB)).count());
+                Math.toIntExact(answers.stream().filter(answer -> isCorrectAnswer(answer, questionsDB)).count());
 
         Map<String, Integer> result = new HashMap<>();
-        result.put("score", rightAnswers);  // Correct answers
-        result.put("totalQuestions", questionsDB.size());  // Total questions
+        result.put("score", rightAnswers);
+        result.put("totalQuestions", questionsDB.size());
 
         int percentage = Math.toIntExact(Math.round((rightAnswers * 100.0) / questionsDB.size()));
         result.put("percentage", percentage);
 
         courseService.addNewStudentResult(percentage, elapsedTime, courseId);
 
+        User user = userService.getUserByUsername(username);
+        Course course = courseService.getCourseById(courseId);
+
+        boolean isAlreadyCompleted = user.getCompletedCourses().stream()
+                .anyMatch(c -> c.getId().equals(courseId));
+
+        if (!isAlreadyCompleted) {
+            user.addCompletedCourse(course);
+            userService.save(user);
+        }
+
         return ResponseEntity.ok(result);
     }
 
-
     private boolean isCorrectAnswer(Response answer, List<Question> questions) {
         return questions.stream()
-            .filter(question -> question.getId() == answer.getQuestionId())
-            .findFirst()
-            .map(question -> question.getCorrectAnswer().equals(answer.getAnswer()))
-            .orElse(false);
+                .filter(question -> question.getId() == answer.getQuestionId())
+                .findFirst()
+                .map(question -> question.getCorrectAnswer().equals(answer.getAnswer()))
+                .orElse(false);
     }
 
 

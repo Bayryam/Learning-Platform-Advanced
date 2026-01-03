@@ -1,6 +1,7 @@
 package course.spring.elearningplatform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -8,6 +9,7 @@ import lombok.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -89,12 +91,23 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "lesson_id")
     )
-    @JsonIgnore
     private Set<Lesson> completedLessons = new HashSet<>();
 
     @OneToMany(mappedBy = "issuedTo", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Certificate> certificates;
+
+    @JsonProperty("startedCourses")
+    public Set<Long> getStartedCoursesIds() {
+        if (startedCourses == null) return new HashSet<>();
+        return startedCourses.stream().map(Course::getId).collect(Collectors.toSet());
+    }
+
+    @JsonProperty("completedCourses")
+    public Set<Long> getCompletedCoursesIds() {
+        if (completedCourses == null) return new HashSet<>();
+        return completedCourses.stream().map(Course::getId).collect(Collectors.toSet());
+    }
 
     public void addCertificate(Certificate certificate) {
         certificates.add(certificate);
