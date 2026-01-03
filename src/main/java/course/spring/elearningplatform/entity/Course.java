@@ -60,7 +60,7 @@ public class Course {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Quiz quiz;
 
-    @ManyToMany(cascade = CascadeType.ALL) // Ensures cascading behavior for highScores
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<StudentResult> highScores;
     @JsonIgnore
     @OneToMany(mappedBy = "forCourse")

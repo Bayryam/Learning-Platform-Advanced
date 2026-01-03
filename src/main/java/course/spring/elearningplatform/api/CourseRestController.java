@@ -112,6 +112,7 @@ public class CourseRestController {
             response.put("isCreator", course.getCreatedBy().getId().equals(user.getId()));
             response.put("isCourseStarted", user.getStartedCourses().contains(course));
             response.put("isCourseCompleted", user.getCompletedCourses().contains(course));
+            response.put("hasQuiz", course.getQuiz() != null);
         }
         
         return ResponseEntity.ok(response);
