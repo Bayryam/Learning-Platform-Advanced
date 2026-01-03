@@ -76,6 +76,10 @@ public class HomeRestController {
                 .limit(3)
                 .collect(Collectors.toList());
 
+        response.put("totalEvents", upcomingEvents.size());
+        response.put("totalCourses", courseService.getAllCourses().size());
+        response.put("totalAssignments", upcomingAssignments.size());
+
         response.put("upcomingEvents", upcomingEvents);
         response.put("top3CoursesByCategory", top3CoursesByCategory);
         response.put("upcomingAssignments", upcomingAssignments);

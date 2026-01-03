@@ -53,6 +53,7 @@ public class User {
         return firstName + " " + lastName;
     }
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Group> groups;
 

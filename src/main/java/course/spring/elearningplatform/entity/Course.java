@@ -52,12 +52,15 @@ public class Course {
     private List<User> studentsCompletedCourse;
 
     @OneToMany
+    @JsonIgnore
     private List<Lesson> lessons;
 
     @OneToMany
+    @JsonIgnore
     private List<Question> questions;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Quiz quiz;
 
     @ManyToMany(cascade = CascadeType.ALL) // Ensures cascading behavior for highScores
@@ -67,6 +70,7 @@ public class Course {
     private List<Ticket> tickets;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Assignment> assignments = new ArrayList<>();
 
     @OneToOne

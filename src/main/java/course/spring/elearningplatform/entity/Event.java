@@ -1,5 +1,6 @@
 package course.spring.elearningplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,8 +22,10 @@ public class Event {
 
     @ManyToOne
     @JoinColumn(name = "course_id")
+    @JsonIgnore
     private Course course;
 
+    @JsonIgnore
     private String instructor;
 
     @OneToOne(fetch = FetchType.EAGER)
