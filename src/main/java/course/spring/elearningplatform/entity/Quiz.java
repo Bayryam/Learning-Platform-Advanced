@@ -20,7 +20,7 @@ public class Quiz {
     private String title;
     @ManyToMany(cascade = CascadeType.ALL)
     private List<StudentResult> highScores;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     private List<Question> questions;
     @OneToOne(mappedBy = "quiz")
     private Course course;
