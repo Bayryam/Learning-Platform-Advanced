@@ -4,6 +4,7 @@ import course.spring.elearningplatform.dto.ImageDto;
 import course.spring.elearningplatform.dto.UserDto;
 import course.spring.elearningplatform.entity.Course;
 import course.spring.elearningplatform.entity.Image;
+import course.spring.elearningplatform.entity.Lesson;
 import course.spring.elearningplatform.entity.Role;
 import course.spring.elearningplatform.entity.User;
 import course.spring.elearningplatform.exception.DuplicateEmailException;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -80,12 +82,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException(String.valueOf(id)));
+        User user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException(String.valueOf(id)));
+        Set<Course> completedCourses = user.getCompletedCourses().stream().map(course -> new Course(course.getId(), course.getName(), course.getDescription(), course.getCategories(),
+                null, null, null, null, null, null, null, null, null,
+                null, null, null, null)).collect(Collectors.toSet());
+        user.setCompletedCourses(completedCourses);
+        return user;
     }
 
     @Override
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        Set<Course> completedCourses = user.getCompletedCourses().stream().map(course -> new Course(course.getId(), course.getName(), course.getDescription(), course.getCategories(),
+                null, null, null, null, null, null, null, null, null,
+                null, null, null, null)).collect(Collectors.toSet());
+        user.setCompletedCourses(completedCourses);
+        return user;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package course.spring.elearningplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,8 +25,10 @@ public class Lesson {
     @Column(length = 65535)
     private String content;
 
+    @JsonIgnore
     private Date createdOn;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
     private Course relatedCourse;
 }

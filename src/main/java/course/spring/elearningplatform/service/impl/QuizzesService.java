@@ -84,8 +84,8 @@ public class QuizzesService {
             Math.toIntExact(answers.stream().filter(answer -> isCorrectAnswer(answer, questionsDB)).count());
 
         Map<String, Integer> result = new HashMap<>();
-        result.put("score", rightAnswers);  // Correct answers
-        result.put("totalQuestions", questionsDB.size());  // Total questions
+        result.put("score", rightAnswers);
+        result.put("totalQuestions", questionsDB.size());
 
         int percentage = Math.toIntExact(Math.round((rightAnswers * 100.0) / questionsDB.size()));
         result.put("percentage", percentage);
