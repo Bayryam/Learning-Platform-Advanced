@@ -33,10 +33,10 @@ public class AdminRestController {
     private final ActivityLogService activityLogService;
 
     @Autowired
-    public AdminRestController(UserService userService, GroupService groupService, 
-                              ArticleService articleService, AnnouncementService announcementService,
-                              FAQService faqService, NewsService newsService, 
-                              CourseService courseService, ActivityLogService activityLogService) {
+    public AdminRestController(UserService userService, GroupService groupService,
+                               ArticleService articleService, AnnouncementService announcementService,
+                               FAQService faqService, NewsService newsService,
+                               CourseService courseService, ActivityLogService activityLogService) {
         this.userService = userService;
         this.groupService = groupService;
         this.articleService = articleService;
@@ -82,7 +82,7 @@ public class AdminRestController {
 
     @GetMapping("/users/all")
     public ResponseEntity<?> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+        return ResponseEntity.ok(userService.getAllUsersExcept(List.of("deletedUser")));
     }
 
     @GetMapping("/student-groups")
@@ -177,23 +177,23 @@ public class AdminRestController {
     }
 
     @GetMapping("/activity-log")
-public ResponseEntity<?> getActivityLog() {
-    Map<ActivityLog, String> logsMap = activityLogService.getAllLogs();
-    List<Map<String, Object>> formattedLogs = new ArrayList<>();
-    
-    for (Map.Entry<ActivityLog, String> entry : logsMap.entrySet()) {
-        ActivityLog log = entry.getKey();
-        Map<String, Object> logData = new HashMap<>();
-        logData.put("id", log.getId());
-        logData.put("action", log.getAction());
-        logData.put("username", log.getUsername());
-        logData.put("timestamp", log.getTimestamp());
-        logData.put("formattedDate", entry.getValue());
-        formattedLogs.add(logData);
+    public ResponseEntity<?> getActivityLog() {
+        Map<ActivityLog, String> logsMap = activityLogService.getAllLogs();
+        List<Map<String, Object>> formattedLogs = new ArrayList<>();
+
+        for (Map.Entry<ActivityLog, String> entry : logsMap.entrySet()) {
+            ActivityLog log = entry.getKey();
+            Map<String, Object> logData = new HashMap<>();
+            logData.put("id", log.getId());
+            logData.put("action", log.getAction());
+            logData.put("username", log.getUsername());
+            logData.put("timestamp", log.getTimestamp());
+            logData.put("formattedDate", entry.getValue());
+            formattedLogs.add(logData);
+        }
+
+        return ResponseEntity.ok(formattedLogs);
     }
-    
-    return ResponseEntity.ok(formattedLogs);
-}
 
     @GetMapping("/roles")
     public ResponseEntity<?> getRoles() {
