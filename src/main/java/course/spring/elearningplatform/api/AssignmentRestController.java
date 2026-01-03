@@ -3,6 +3,7 @@ package course.spring.elearningplatform.api;
 import course.spring.elearningplatform.dto.AssignmentDto;
 import course.spring.elearningplatform.dto.mapper.EntityMapper;
 import course.spring.elearningplatform.entity.Assignment;
+import course.spring.elearningplatform.entity.Course;
 import course.spring.elearningplatform.entity.CustomUserDetails;
 import course.spring.elearningplatform.entity.Solution;
 import course.spring.elearningplatform.entity.User;
@@ -10,6 +11,7 @@ import course.spring.elearningplatform.service.ActivityLogService;
 import course.spring.elearningplatform.service.AssignmentService;
 import course.spring.elearningplatform.service.CourseService;
 import course.spring.elearningplatform.service.SolutionService;
+import course.spring.elearningplatform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,14 +37,16 @@ public class AssignmentRestController {
     private final SolutionService solutionService;
     private final CourseService courseService;
     private final ActivityLogService activityLogService;
+    private final UserService userService;
 
     @Autowired
     public AssignmentRestController(AssignmentService assignmentService, SolutionService solutionService,
-                                    CourseService courseService, ActivityLogService activityLogService) {
+                                    CourseService courseService, ActivityLogService activityLogService, UserService userService) {
         this.assignmentService = assignmentService;
         this.solutionService = solutionService;
         this.courseService = courseService;
         this.activityLogService = activityLogService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -50,8 +54,16 @@ public class AssignmentRestController {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         User user = userDetails.user();
+        User realUser = userService.getUserById(user.getId());
 
-        List<AssignmentDto> assignments = assignmentService.getAllAssignments();
+        List<AssignmentDto> assignments = assignmentService.getAllAssignments()
+                .stream()
+                .filter(assignment -> realUser.getStartedCourses()
+                        .stream()
+                        .map(Course::getId)
+                        .toList()
+                        .contains(assignment.getCourseId()))
+                .collect(Collectors.toList());
 
         Map<Long, Boolean> userSolutionStatus = assignments.stream()
                 .collect(Collectors.toMap(
@@ -62,7 +74,9 @@ public class AssignmentRestController {
         Map<String, Object> response = new HashMap<>();
         response.put("assignments", assignments);
         response.put("userSolutionStatus", userSolutionStatus);
-        response.put("courses", courseService.getAllCourses());
+        response.put("courses", courseService.getAllCourses().stream().map(course -> new Course(course.getId(), course.getName(),
+                course.getDescription(), course.getCategories(), null, null, null, null, null,
+                null, null, null, null, null, null, null, null)).toList());
 
         return ResponseEntity.ok(response);
     }
