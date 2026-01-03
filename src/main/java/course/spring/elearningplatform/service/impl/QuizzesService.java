@@ -48,29 +48,68 @@ public class QuizzesService {
         this.courseService = courseService;
     }
 
-    public Quiz createQuiz(QuizDto quizDto, List<Question> quizQuestions) {
-        if (quizQuestions.isEmpty()) {
+
+    public Quiz createQuiz(QuizDto quizDto, List<Question> allQuestions) {
+    var quiz = new Quiz();
+    quiz.setTitle(quizDto.getTitle());
+
+    List<Question> selectedQuestions;
+    
+    // If specific questions are selected, use those
+    if (quizDto.getSelectedQuestionIds() != null && !quizDto.getSelectedQuestionIds().isEmpty()) {
+        selectedQuestions = allQuestions.stream()
+            .filter(q -> quizDto.getSelectedQuestionIds().contains(q.getId()))
+            .toList();
+        
+        if (selectedQuestions.isEmpty()) {
+            throw new EntityNotFoundException("None of the selected questions were found.");
+        }
+    } else {
+        // Fallback to old behavior if no specific questions selected
+        if (allQuestions.isEmpty()) {
             throw new EntityNotFoundException("There are no questions for creating a quiz. Try adding some.");
         }
-
-        var quiz = new Quiz();
-        quiz.setTitle(quizDto.getTitle());
-
-        Collections.shuffle(quizQuestions);
-        List<Question> selectedQuestions = quizQuestions.stream()
-                .limit(quizDto.getNumberOfQuestions())
-                .toList();
-
-        quiz.setQuestions(new ArrayList<>(selectedQuestions));
-
-        return quizRepository.save(quiz);
+        
+        Collections.shuffle(allQuestions);
+        selectedQuestions = allQuestions.stream()
+            .limit(quizDto.getNumberOfQuestions())
+            .toList();
     }
+
+    quiz.setQuestions(new ArrayList<>(selectedQuestions));
+    return quizRepository.save(quiz);
+}
 
     public Quiz getQuizById(long id) {
         return quizRepository.findById(id)
                 .orElseThrow(
                         () -> new EntityNotFoundException(String.format("Quiz with id %s not found", id), "redirect:/home"));
 
+    }
+
+    public void updateQuiz(long quizId, long courseId, QuizDto quizDto) {
+        var quiz = getQuizById(quizId);
+        var allQuestions = courseService.getAllQuestionsForCourse(courseId);
+
+        // Update title
+        quiz.setTitle(quizDto.getTitle());
+
+        // Update questions
+        List<Question> selectedQuestions;
+        if (quizDto.getSelectedQuestionIds() != null && !quizDto.getSelectedQuestionIds().isEmpty()) {
+            selectedQuestions = allQuestions.stream()
+                .filter(q -> quizDto.getSelectedQuestionIds().contains(q.getId()))
+                .toList();
+
+            if (selectedQuestions.isEmpty()) {
+                throw new EntityNotFoundException("None of the selected questions were found.");
+            }
+        } else {
+            throw new EntityNotFoundException("Please select at least one question.");
+        }
+
+        quiz.setQuestions(new ArrayList<>(selectedQuestions));
+        quizRepository.save(quiz);
     }
 
     @Transactional

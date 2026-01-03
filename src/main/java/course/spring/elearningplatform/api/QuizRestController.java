@@ -45,6 +45,34 @@ public class QuizRestController {
         }
     }
 
+    @GetMapping("/{quizId}/details")
+    public ResponseEntity<?> getQuizDetails(@PathVariable long quizId) {
+        try {
+            var quiz = quizzesService.getQuizById(quizId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", quiz.getId());
+            response.put("title", quiz.getTitle());
+            response.put("questions", quiz.getQuestions());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to load quiz details: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{quizId}")
+    public ResponseEntity<?> updateQuiz(@PathVariable long quizId,
+                                    @RequestParam long courseId,
+                                    @RequestBody QuizDto quizDto,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            quizzesService.updateQuiz(quizId, courseId, quizDto);
+            activityLogService.logActivity("Quiz updated", userDetails.getUsername());
+            return ResponseEntity.ok(Map.of("message", "Quiz updated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to update quiz: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/course/{courseId}")
     public ResponseEntity<?> getQuizForCourse(@PathVariable long courseId) {
         try {

@@ -116,8 +116,11 @@ public class CourseRestController {
             response.put("isCourseStarted", user.getStartedCourses().contains(course));
             response.put("isCourseCompleted", user.getCompletedCourses().contains(course));
             response.put("hasQuiz", course.getQuiz() != null);
-        }
-
+            if (course.getQuiz() != null) {
+                response.put("quizId", course.getQuiz().getId());
+            }
+}
+        
         return ResponseEntity.ok(response);
     }
 
@@ -142,7 +145,7 @@ public class CourseRestController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<?> startCourse(@PathVariable Long id,
+    public ResponseEntity<?> startCourse(@PathVariable Long id, 
                                          @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
         Course startedCourse = courseService.startCourse(id, user);
