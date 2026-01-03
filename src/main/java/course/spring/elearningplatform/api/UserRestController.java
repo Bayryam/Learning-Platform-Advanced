@@ -1,6 +1,7 @@
 package course.spring.elearningplatform.api;
 
 import course.spring.elearningplatform.dto.ImageDto;
+import course.spring.elearningplatform.entity.Role;
 import course.spring.elearningplatform.entity.User;
 import course.spring.elearningplatform.service.ActivityLogService;
 import course.spring.elearningplatform.service.UserService;
@@ -46,6 +47,12 @@ public class UserRestController {
                 .filter(username -> username.toLowerCase().contains(query.toLowerCase()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(usernames);
+    }
+
+    @GetMapping("/instructors")
+    public ResponseEntity<?> getAllInstructors() {
+        List<User> instructors = userService.getAllUsersByRole(Role.INSTRUCTOR2);
+        return ResponseEntity.ok(instructors);
     }
 
     @GetMapping("/{id}")

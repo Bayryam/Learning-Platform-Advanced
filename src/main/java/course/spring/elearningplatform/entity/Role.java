@@ -9,7 +9,8 @@ public enum Role implements GrantedAuthority {
     STUDENT("ROLE_STUDENT"),
     INSTRUCTOR("ROLE_INSTRUCTOR"),
     ADMIN("ROLE_ADMIN"),
-    UNREGISTERED("ROLE_UNREGISTERED");
+    UNREGISTERED("ROLE_UNREGISTERED"),
+    INSTRUCTOR2("INSTRUCTOR");
 
     Role(String description) {
         this.description = description;
