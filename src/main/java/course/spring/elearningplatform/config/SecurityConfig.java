@@ -42,6 +42,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/me", "/api/home", "/api/home/**").permitAll()
+                .requestMatchers("/api/users/*/enrolled-courses").permitAll() // Allow Node.js service to check enrollments
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/instructor/**").hasRole("INSTRUCTOR")
                 .requestMatchers("/api/**").authenticated()

@@ -2,14 +2,17 @@
 package course.spring.elearningplatform.service.impl;
 
 import course.spring.elearningplatform.dto.AssignmentDto;
+import course.spring.elearningplatform.dto.AssignmentNotificationDto;
 import course.spring.elearningplatform.entity.*;
 import course.spring.elearningplatform.exception.EntityNotFoundException;
 import course.spring.elearningplatform.repository.AssignmentRepository;
 import course.spring.elearningplatform.repository.CourseRepository;
 import course.spring.elearningplatform.service.AssignmentService;
+import course.spring.elearningplatform.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,11 +20,15 @@ import java.util.stream.Collectors;
 public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final CourseRepository courseRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public AssignmentServiceImpl(AssignmentRepository assignmentRepository, CourseRepository courseRepository) {
+    public AssignmentServiceImpl(AssignmentRepository assignmentRepository,
+                                  CourseRepository courseRepository,
+                                  NotificationService notificationService) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -59,6 +66,22 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
 
         Assignment savedAssignment = assignmentRepository.save(assignment);
+
+        if (savedAssignment.getCourse() != null) {
+            AssignmentNotificationDto notification = new AssignmentNotificationDto(
+                    savedAssignment.getId(),
+                    savedAssignment.getCourse().getId(),
+                    savedAssignment.getCourse().getName(),
+                    savedAssignment.getTitle(),
+                    savedAssignment.getDescription(),
+                    savedAssignment.getCourse().getCreatedBy() != null ?
+                        savedAssignment.getCourse().getCreatedBy().getUsername() : "Unknown",
+                    savedAssignment.getDueDate(),
+                    LocalDateTime.now()
+            );
+            notificationService.sendAssignmentNotification(notification);
+        }
+
         return mapToDto(savedAssignment);
     }
 
