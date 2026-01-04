@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import course.spring.elearningplatform.service.impl.ExternalNewsService;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -18,16 +19,24 @@ public class NewsRestController {
 
     private final NewsService newsService;
     private final ActivityLogService activityLogService;
+    private final ExternalNewsService externalNewsService;
 
     @Autowired
-    public NewsRestController(NewsService newsService, ActivityLogService activityLogService) {
+    public NewsRestController(NewsService newsService, ActivityLogService activityLogService, ExternalNewsService externalNewsService) {
         this.newsService = newsService;
         this.activityLogService = activityLogService;
+        this.externalNewsService = externalNewsService;
     }
 
     @GetMapping
     public ResponseEntity<?> getAllNews() {
         return ResponseEntity.ok(newsService.getAllNews());
+    }
+
+    @GetMapping("/external")
+    public ResponseEntity<?> getExternalNews(@RequestParam(defaultValue = "6") int pageSize) {
+        Map<String, Object> news = externalNewsService.getEducationalNews(pageSize);
+        return ResponseEntity.ok(news);
     }
 
     @GetMapping("/{id}")
