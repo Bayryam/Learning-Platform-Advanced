@@ -1,8 +1,10 @@
 package course.spring.elearningplatform.api;
 
 import course.spring.elearningplatform.dto.ImageDto;
+import course.spring.elearningplatform.entity.Course;
 import course.spring.elearningplatform.entity.Role;
 import course.spring.elearningplatform.entity.User;
+import course.spring.elearningplatform.repository.UserRepository;
 import course.spring.elearningplatform.service.ActivityLogService;
 import course.spring.elearningplatform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +25,13 @@ public class UserRestController {
 
     private final UserService userService;
     private final ActivityLogService activityLogService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UserRestController(UserService userService, ActivityLogService activityLogService) {
+    public UserRestController(UserService userService, ActivityLogService activityLogService, UserRepository userRepository) {
         this.userService = userService;
         this.activityLogService = activityLogService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/profile")
@@ -124,5 +128,23 @@ public class UserRestController {
         ImageDto imageDto = new ImageDto(file);
         userService.updateUserDetails(userId, "profilePicture", imageDto);
         return ResponseEntity.ok(Map.of("message", "Profile picture updated successfully"));
+    }
+
+    @GetMapping("/{userId}/enrolled-courses")
+    public ResponseEntity<List<Long>> getEnrolledCourses(@PathVariable Long userId) {
+        if (!userRepository.existsById(userId)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Course> startedCourses = userRepository.findStartedCoursesByUserId(userId);
+
+        if (startedCourses == null || startedCourses.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+
+        List<Long> courseIds = startedCourses.stream()
+                .map(Course::getId)
+                .toList();
+
+        return ResponseEntity.ok(courseIds);
     }
 }
