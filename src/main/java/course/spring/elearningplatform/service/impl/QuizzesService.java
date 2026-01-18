@@ -55,7 +55,7 @@ public class QuizzesService {
 
     List<Question> selectedQuestions;
     
-    // If specific questions are selected, use those
+   
     if (quizDto.getSelectedQuestionIds() != null && !quizDto.getSelectedQuestionIds().isEmpty()) {
         selectedQuestions = allQuestions.stream()
             .filter(q -> quizDto.getSelectedQuestionIds().contains(q.getId()))
@@ -65,7 +65,7 @@ public class QuizzesService {
             throw new EntityNotFoundException("None of the selected questions were found.");
         }
     } else {
-        // Fallback to old behavior if no specific questions selected
+       
         if (allQuestions.isEmpty()) {
             throw new EntityNotFoundException("There are no questions for creating a quiz. Try adding some.");
         }
@@ -91,10 +91,10 @@ public class QuizzesService {
         var quiz = getQuizById(quizId);
         var allQuestions = courseService.getAllQuestionsForCourse(courseId);
 
-        // Update title
+       
         quiz.setTitle(quizDto.getTitle());
 
-        // Update questions
+       
         List<Question> selectedQuestions;
         if (quizDto.getSelectedQuestionIds() != null && !quizDto.getSelectedQuestionIds().isEmpty()) {
             selectedQuestions = allQuestions.stream()

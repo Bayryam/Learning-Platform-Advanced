@@ -198,7 +198,7 @@ public class CourseRestController {
         response.put("course", toCourseResponse(course));
         response.put("lesson", toLessonResponse(lesson));
 
-        // Map completed lessons to simple response objects
+
         List<Map<String, Object>> completedLessonsInfo = user.getCompletedLessons().stream()
                 .map(l -> Map.of("id", (Object) l.getId(), "title", (Object) l.getTitle()))
                 .collect(java.util.stream.Collectors.toList());
@@ -209,7 +209,7 @@ public class CourseRestController {
         return ResponseEntity.ok(response);
     }
 
-    // Add this helper method at the end of the class
+
     private course.spring.elearningplatform.dto.response.LessonResponse toLessonResponse(Lesson lesson) {
         course.spring.elearningplatform.dto.response.LessonResponse response = new course.spring.elearningplatform.dto.response.LessonResponse();
         response.setId(lesson.getId());

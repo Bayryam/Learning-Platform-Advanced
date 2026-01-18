@@ -41,7 +41,7 @@ public class ExternalNewsService {
             if (response != null && "ok".equals(response.get("status"))) {
                 List<Map<String, Object>> articles = (List<Map<String, Object>>) response.get("articles");
                 
-                // Filter out articles with removed content
+
                 List<Map<String, Object>> validArticles = articles.stream()
                         .filter(article -> {
                             String title = (String) article.get("title");
@@ -58,7 +58,7 @@ public class ExternalNewsService {
 
             return Map.of("articles", List.of(), "totalResults", 0);
         } catch (Exception e) {
-            // Return empty results on error
+
             return Map.of("articles", List.of(), "totalResults", 0, "error", e.getMessage());
         }
     }

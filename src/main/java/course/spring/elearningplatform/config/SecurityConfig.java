@@ -32,7 +32,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Add this line
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/api/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -42,7 +42,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/me", "/api/home", "/api/home/**").permitAll()
-                .requestMatchers("/api/users/*/enrolled-courses").permitAll() // Allow Node.js service to check enrollments
+                .requestMatchers("/api/users/*/enrolled-courses").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/instructor/**").hasRole("INSTRUCTOR")
                 .requestMatchers("/api/**").authenticated()
@@ -81,8 +81,8 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
-        source.registerCorsConfiguration("/login", configuration);  // Add this line
-        source.registerCorsConfiguration("/logout", configuration);  // Add this line
+        source.registerCorsConfiguration("/login", configuration);
+        source.registerCorsConfiguration("/logout", configuration);
         return source;
     }
     @Bean

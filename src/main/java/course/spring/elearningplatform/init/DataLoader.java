@@ -40,7 +40,7 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
-    // Creates a user that is used for reassigning courses to him when a user that has created a course is deleted
+   
     private void createDeletedUser() {
         Optional<User> deletedUser = userRepository.findByUsername("deletedUser");
 

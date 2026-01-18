@@ -38,8 +38,8 @@ async function getEnrolledCourses(userId) {
     }
 }
 
-const courseRooms = new Map(); // courseId -> Set of socketIds
-const userSockets = new Map(); // socketId -> { userId, courseIds: [] }
+const courseRooms = new Map();
+const userSockets = new Map();
 
 io.on('connection', (socket) => {
     console.log(`Client connected: ${socket.id}`);

@@ -91,7 +91,7 @@ public class CourseServiceImpl implements CourseService {
                         AbstractMap.SimpleEntry::getKey,
                         Collectors.mapping(
                                 AbstractMap.SimpleEntry::getValue,
-                                Collectors.toSet()  // Use Set to avoid duplicates
+                                Collectors.toSet()
                         )
                 ));
     }
@@ -118,7 +118,7 @@ public class CourseServiceImpl implements CourseService {
                         course.setImageBase64(image.parseImage());
                     }
                 })
-                .filter(course -> !completedCourses.contains(course)) // Remove completed courses
+                .filter(course -> !completedCourses.contains(course))
                 .toList();
     }
 
@@ -286,7 +286,7 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new EntityNotFoundException("Student result not found"));
             studentResultRepository.updateStudentResult(result.getId(), percentage, elapsedTime);
             studentResultRepository.flush();
-            entityManager.clear(); // Clear the persistence context
+            entityManager.clear();
             var updatedResult = studentResultRepository.findById(result.getId()).orElseThrow(() -> new EntityNotFoundException("Student result not found"));
             course.getHighScores().removeIf(score -> score.getId().equals(updatedResult.getId()));
             course.getHighScores().add(updatedResult);

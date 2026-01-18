@@ -7,5 +7,5 @@ import java.util.List;
 public class QuizDto {
     private String title;
     private int numberOfQuestions;
-    private List<Long> selectedQuestionIds; // NEW FIELD
+    private List<Long> selectedQuestionIds;
 }

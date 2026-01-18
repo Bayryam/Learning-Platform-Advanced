@@ -22,5 +22,5 @@ public class CourseDto {
     @NotEmpty(message = "At least one category is required!")
     private List<String> categories;
 
-    private MultipartFile image;  // Changed from ImageDto to MultipartFile directly
+    private MultipartFile image;
 }

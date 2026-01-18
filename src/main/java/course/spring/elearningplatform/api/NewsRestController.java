@@ -48,7 +48,7 @@ public class NewsRestController {
     @PostMapping
     public ResponseEntity<?> createNews(@RequestBody News news) {
         news.setPublishedDate(LocalDateTime.now());
-        newsService.saveNews(news);  // Changed from addNews to saveNews
+        newsService.saveNews(news);
         activityLogService.logActivity("News added", news.getAuthor());
         return ResponseEntity.ok(Map.of("message", "News created successfully"));
     }

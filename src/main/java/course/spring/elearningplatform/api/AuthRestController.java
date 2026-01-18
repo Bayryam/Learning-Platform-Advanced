@@ -61,7 +61,7 @@ public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse 
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Save to session
+
             HttpSession session = request.getSession(true);
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
@@ -92,7 +92,7 @@ public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.ok(Map.of("authenticated", false));  // Return 200 instead of 401
+            return ResponseEntity.ok(Map.of("authenticated", false));
         }
 
         User user = userService.getUserByUsername(userDetails.getUsername());

@@ -52,14 +52,12 @@ public class HomeRestController {
             response.put("user", loggedUser);
         }
 
-        // Get upcoming events (top 3)
         List<Event> upcomingEvents = eventService.getAllEvents().stream()
                 .filter(event -> event.getStartTime().isAfter(LocalDateTime.now()))
                 .sorted(Comparator.comparing(Event::getStartTime))
                 .limit(3)
                 .collect(Collectors.toList());
 
-        // Get top 3 courses by category
         Map<String, java.util.Set<Course>> coursesByCategory = courseService.getCoursesGroupedByCategory();
         Map<String, List<Course>> top3CoursesByCategory = coursesByCategory.entrySet().stream()
                 .collect(Collectors.toMap(
@@ -67,7 +65,7 @@ public class HomeRestController {
                         entry -> entry.getValue().stream().limit(3).toList()
                 ));
 
-        // Get upcoming assignments (top 3)
+
         List<AssignmentDto> assignmentDtos = assignmentService.getAllAssignments();
         List<Assignment> upcomingAssignments = assignmentDtos.stream()
                 .map(dto -> EntityMapper.mapCreateDtoToEntity(dto, Assignment.class))

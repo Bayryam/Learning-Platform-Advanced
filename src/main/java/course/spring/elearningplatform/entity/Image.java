@@ -41,7 +41,7 @@ public class Image {
   }
 
   public String parseImage() {
-    String defaultMimeType = "image/jpeg"; // Default MIME type for existing images
+    String defaultMimeType = "image/jpeg";
     return image != null ? "data:" + (mimeType != null ? mimeType : defaultMimeType) + ";base64," + Base64.getEncoder().encodeToString(image) : null;
   }
 }
